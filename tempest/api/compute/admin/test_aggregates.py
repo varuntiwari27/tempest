@@ -37,6 +37,7 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
         super(AggregatesAdminTestJSON, cls).resource_setup()
         cls.aggregate_name_prefix = 'test_aggregate'
         cls.az_name_prefix = 'test_az'
+        print("Hello")
 
         cls.host = None
         hypers = cls.os_adm.hypervisor_client.list_hypervisors(
