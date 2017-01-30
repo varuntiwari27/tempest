@@ -44,33 +44,3 @@ class KeyPairsV210TestJSON(base.BaseKeypairTest):
             keypair.pop('user_id')
             key_list.append(keypair)
         return key_list
-
-    @test.idempotent_id('3c8484af-cfb3-48f6-b8ba-d5d58bbf3eac')
-    def test_admin_manage_keypairs_for_other_users(self):
-        user_id = self.non_admin_client.user_id
-        key_list = self._create_and_check_keypairs(user_id)
-        first_keyname = key_list[0]['name']
-        keypair_detail = self.client.show_keypair(first_keyname,
-                                                  user_id=user_id)['keypair']
-        self.assertEqual(first_keyname, keypair_detail['name'])
-        self.assertEqual(user_id, keypair_detail['user_id'],
-                         "The fetched keypair is not for requested user!")
-        # Create a admin keypair
-        admin_k_name = data_utils.rand_name('keypair')
-        admin_keypair = self._create_keypair(admin_k_name, keypair_type='ssh')
-        admin_keypair.pop('private_key', None)
-        admin_keypair.pop('user_id')
-
-        # Admin fetch keypairs list of non admin user
-        keypairs = self.client.list_keypairs(user_id=user_id)['keypairs']
-        fetched_list = [keypair['keypair'] for keypair in keypairs]
-
-        # Check admin keypair is not present in non admin user keypairs list
-        self.assertNotIn(admin_keypair, fetched_list,
-                         "The fetched user keypairs has admin keypair!")
-
-        # Now check if all the created keypairs are in the fetched list
-        missing_kps = [kp for kp in key_list if kp not in fetched_list]
-        self.assertFalse(missing_kps,
-                         "Failed to find keypairs %s in fetched list"
-                         % ', '.join(m_key['name'] for m_key in missing_kps))

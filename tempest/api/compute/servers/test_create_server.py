@@ -350,14 +350,3 @@ class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
             servers_client=self.client)
         partition_num_emph = len(linux_client.get_partitions().split('\n'))
         self.assertEqual(partition_num + 1, partition_num_emph)
-
-
-class ServersTestManualDisk(ServersTestJSON):
-    disk_config = 'MANUAL'
-
-    @classmethod
-    def skip_checks(cls):
-        super(ServersTestManualDisk, cls).skip_checks()
-        if not CONF.compute_feature_enabled.disk_config:
-            msg = "DiskConfig extension not enabled."
-            raise cls.skipException(msg)

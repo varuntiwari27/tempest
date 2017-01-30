@@ -55,62 +55,6 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
             flavor_id = data_utils.rand_int_id(start=1000)
         return flavor_id
 
-    @test.idempotent_id('28dcec23-f807-49da-822c-56a92ea3c687')
-    @testtools.skipUnless(CONF.compute_feature_enabled.resize,
-                          'Resize not available.')
-    @test.attr(type=['negative'])
-    def test_resize_server_using_overlimit_ram(self):
-        # NOTE(mriedem): Avoid conflicts with os-quota-class-sets tests.
-        self.useFixture(fixtures.LockFixture('compute_quotas'))
-        flavor_name = data_utils.rand_name("flavor")
-        flavor_id = self._get_unused_flavor_id()
-        quota_set = (self.quotas_client.show_default_quota_set(self.tenant_id)
-                     ['quota_set'])
-        ram = int(quota_set['ram'])
-        if ram == -1:
-            raise self.skipException("default ram quota set is -1,"
-                                     " cannot test overlimit")
-        ram += 1
-        vcpus = 8
-        disk = 10
-        flavor_ref = self.flavors_client.create_flavor(name=flavor_name,
-                                                       ram=ram, vcpus=vcpus,
-                                                       disk=disk,
-                                                       id=flavor_id)['flavor']
-        self.addCleanup(self.flavors_client.delete_flavor, flavor_id)
-        self.assertRaises((lib_exc.Forbidden, lib_exc.OverLimit),
-                          self.client.resize_server,
-                          self.servers[0]['id'],
-                          flavor_ref['id'])
-
-    @test.idempotent_id('7368a427-2f26-4ad9-9ba9-911a0ec2b0db')
-    @testtools.skipUnless(CONF.compute_feature_enabled.resize,
-                          'Resize not available.')
-    @test.attr(type=['negative'])
-    def test_resize_server_using_overlimit_vcpus(self):
-        # NOTE(mriedem): Avoid conflicts with os-quota-class-sets tests.
-        self.useFixture(fixtures.LockFixture('compute_quotas'))
-        flavor_name = data_utils.rand_name("flavor")
-        flavor_id = self._get_unused_flavor_id()
-        ram = 512
-        quota_set = (self.quotas_client.show_default_quota_set(self.tenant_id)
-                     ['quota_set'])
-        vcpus = int(quota_set['cores'])
-        if vcpus == -1:
-            raise self.skipException("default cores quota set is -1,"
-                                     " cannot test overlimit")
-        vcpus += 1
-        disk = 10
-        flavor_ref = self.flavors_client.create_flavor(name=flavor_name,
-                                                       ram=ram, vcpus=vcpus,
-                                                       disk=disk,
-                                                       id=flavor_id)['flavor']
-        self.addCleanup(self.flavors_client.delete_flavor, flavor_id)
-        self.assertRaises((lib_exc.Forbidden, lib_exc.OverLimit),
-                          self.client.resize_server,
-                          self.servers[0]['id'],
-                          flavor_ref['id'])
-
     @test.attr(type=['negative'])
     @test.idempotent_id('b0b4d8af-1256-41ef-9ee7-25f1c19dde80')
     def test_reset_state_server_invalid_state(self):

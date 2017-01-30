@@ -205,23 +205,3 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.assertEqual(aggregate_name, body['name'])
         self.assertIsNone(body['availability_zone'])
         self.assertIn(self.host, body['hosts'])
-
-    @test.idempotent_id('96be03c7-570d-409c-90f8-e4db3c646996')
-    def test_aggregate_add_host_create_server_with_az(self):
-        # Add a host to the given aggregate and create a server.
-        self.useFixture(fixtures.LockFixture('availability_zone'))
-        aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
-        az_name = data_utils.rand_name(self.az_name_prefix)
-        aggregate = self.client.create_aggregate(
-            name=aggregate_name, availability_zone=az_name)['aggregate']
-        self.addCleanup(self.client.delete_aggregate, aggregate['id'])
-        self.client.add_host(aggregate['id'], host=self.host)
-        self.addCleanup(self.client.remove_host, aggregate['id'],
-                        host=self.host)
-        server_name = data_utils.rand_name('test_server')
-        admin_servers_client = self.os_adm.servers_client
-        server = self.create_test_server(name=server_name,
-                                         availability_zone=az_name,
-                                         wait_until='ACTIVE')
-        body = admin_servers_client.show_server(server['id'])['server']
-        self.assertEqual(self.host, body[self._host_key])

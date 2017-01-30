@@ -57,37 +57,6 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(project_name, body['name'])
         self.assertEqual(domain['id'], body['domain_id'])
 
-    @testtools.skipUnless(CONF.identity_feature_enabled.reseller,
-                          'Reseller not available.')
-    @test.idempotent_id('1854f9c0-70bc-4d11-a08a-1c789d339e3d')
-    def test_project_create_with_parent(self):
-        # Create root project without providing a parent_id
-        domain = self.setup_test_domain()
-        domain_id = domain['id']
-
-        root_project_name = data_utils.rand_name('root_project')
-        root_project = self.projects_client.create_project(
-            root_project_name, domain_id=domain_id)['project']
-        self.addCleanup(
-            self.projects_client.delete_project, root_project['id'])
-
-        root_project_id = root_project['id']
-        parent_id = root_project['parent_id']
-        self.assertEqual(root_project_name, root_project['name'])
-        # If not provided, the parent_id must point to the top level
-        # project in the hierarchy, i.e. its domain
-        self.assertEqual(domain_id, parent_id)
-
-        # Create a project using root_project_id as parent_id
-        project_name = data_utils.rand_name('project')
-        project = self.projects_client.create_project(
-            project_name, domain_id=domain_id,
-            parent_id=root_project_id)['project']
-        self.addCleanup(self.projects_client.delete_project, project['id'])
-        parent_id = project['parent_id']
-        self.assertEqual(project_name, project['name'])
-        self.assertEqual(root_project_id, parent_id)
-
     @test.idempotent_id('1f66dc76-50cc-4741-a200-af984509e480')
     def test_project_create_enabled(self):
         # Create a project that is enabled

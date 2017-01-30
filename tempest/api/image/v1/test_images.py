@@ -86,20 +86,6 @@ class CreateRegisterImagesTest(base.BaseV1ImageTest):
         self.assertEqual(properties['key1'], 'value1')
         self.assertEqual(properties['key2'], 'value2')
 
-    @test.idempotent_id('6d0e13a7-515b-460c-b91f-9f4793f09816')
-    def test_register_http_image(self):
-        container_format, disk_format = get_container_and_disk_format()
-        body = self.create_image(name='New Http Image',
-                                 container_format=container_format,
-                                 disk_format=disk_format, is_public=False,
-                                 copy_from=CONF.image.http_image)
-        self.assertIn('id', body)
-        image_id = body.get('id')
-        self.assertEqual('New Http Image', body.get('name'))
-        self.assertFalse(body.get('is_public'))
-        waiters.wait_for_image_status(self.client, image_id, 'active')
-        self.client.show_image(image_id)
-
     @test.idempotent_id('05b19d55-140c-40d0-b36b-fafd774d421b')
     def test_register_image_with_min_ram(self):
         # Register an image with min ram

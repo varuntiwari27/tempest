@@ -26,7 +26,6 @@ CONF = config.CONF
 
 
 class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
-
     @classmethod
     def setup_credentials(cls):
         cls.set_network_resources(network=True, subnet=True, dhcp=True)
@@ -46,8 +45,8 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
         images = images_client.list_images()['images']
 
         if cls.image_ref != cls.image_ref_alt and \
-            any([image for image in images
-                 if image['id'] == cls.image_ref_alt]):
+                any([image for image in images
+                     if image['id'] == cls.image_ref_alt]):
             cls.multiple_images = True
         else:
             cls.image_ref_alt = cls.image_ref
@@ -288,37 +287,6 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
         self.assertIn(self.s1_name, map(lambda x: x['name'], servers))
         self.assertNotIn(self.s2_name, map(lambda x: x['name'], servers))
         self.assertNotIn(self.s3_name, map(lambda x: x['name'], servers))
-
-    @decorators.skip_because(bug="1540645")
-    @test.idempotent_id('a905e287-c35e-42f2-b132-d02b09f3654a')
-    def test_list_servers_filtered_by_ip_regex(self):
-        # Filter servers by regex ip
-        # List all servers filtered by part of ip address.
-        # Here should be listed all servers
-        if not self.fixed_network_name:
-            msg = 'fixed_network_name needs to be configured to run this test'
-            raise self.skipException(msg)
-        self.s1 = self.client.show_server(self.s1['id'])['server']
-        addr_spec = self.s1['addresses'][self.fixed_network_name][0]
-        ip = addr_spec['addr'][0:-3]
-        if addr_spec['version'] == 4:
-            params = {'ip': ip}
-        else:
-            params = {'ip6': ip}
-        # capture all servers in case something goes wrong
-        all_servers = self.client.list_servers(detail=True)
-        body = self.client.list_servers(**params)
-        servers = body['servers']
-
-        self.assertIn(self.s1_name, map(lambda x: x['name'], servers),
-                      "%s not found in %s, all servers %s" %
-                      (self.s1_name, servers, all_servers))
-        self.assertIn(self.s2_name, map(lambda x: x['name'], servers),
-                      "%s not found in %s, all servers %s" %
-                      (self.s2_name, servers, all_servers))
-        self.assertIn(self.s3_name, map(lambda x: x['name'], servers),
-                      "%s not found in %s, all servers %s" %
-                      (self.s3_name, servers, all_servers))
 
     @test.idempotent_id('67aec2d0-35fe-4503-9f92-f13272b867ed')
     def test_list_servers_detailed_limit_results(self):

@@ -63,21 +63,6 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
                           name='')
 
     @test.attr(type=['negative'])
-    @test.idempotent_id('b8a7235e-5246-4a8f-a08e-b34877c6586f')
-    @testtools.skipUnless(CONF.compute_feature_enabled.personality,
-                          'Nova personality feature disabled')
-    def test_personality_file_contents_not_encoded(self):
-        # Use an unencoded file when creating a server with personality
-
-        file_contents = 'This is a test file.'
-        person = [{'path': '/etc/testfile.txt',
-                   'contents': file_contents}]
-
-        self.assertRaises(lib_exc.BadRequest,
-                          self.create_test_server,
-                          personality=person)
-
-    @test.attr(type=['negative'])
     @test.idempotent_id('fcba1052-0a50-4cf3-b1ac-fae241edf02f')
     def test_create_with_invalid_image(self):
         # Create a server with an unknown image

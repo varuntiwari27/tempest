@@ -32,50 +32,6 @@ class BasicOperationsImagesTest(base.BaseV2ImageTest):
     """Here we test the basic operations of images"""
 
     @test.attr(type='smoke')
-    @test.idempotent_id('139b765e-7f3d-4b3d-8b37-3ca3876ee318')
-    def test_register_upload_get_image_file(self):
-        """Here we test these functionalities
-
-        Register image, upload the image file, get image and get image
-        file api's
-        """
-
-        uuid = '00000000-1111-2222-3333-444455556666'
-        image_name = data_utils.rand_name('image')
-        container_format = CONF.image.container_formats[0]
-        disk_format = CONF.image.disk_formats[0]
-        body = self.create_image(name=image_name,
-                                 container_format=container_format,
-                                 disk_format=disk_format,
-                                 visibility='private',
-                                 ramdisk_id=uuid)
-        self.assertIn('id', body)
-        image_id = body.get('id')
-        self.assertIn('name', body)
-        self.assertEqual(image_name, body['name'])
-        self.assertIn('visibility', body)
-        self.assertEqual('private', body['visibility'])
-        self.assertIn('status', body)
-        self.assertEqual('queued', body['status'])
-
-        # Now try uploading an image file
-        file_content = data_utils.random_bytes()
-        image_file = moves.cStringIO(file_content)
-        self.client.store_image_file(image_id, image_file)
-
-        # Now try to get image details
-        body = self.client.show_image(image_id)
-        self.assertEqual(image_id, body['id'])
-        self.assertEqual(image_name, body['name'])
-        self.assertEqual(uuid, body['ramdisk_id'])
-        self.assertIn('size', body)
-        self.assertEqual(1024, body.get('size'))
-
-        # Now try get image file
-        body = self.client.show_image_file(image_id)
-        self.assertEqual(file_content, body.data)
-
-    @test.attr(type='smoke')
     @test.idempotent_id('f848bb94-1c6e-45a4-8726-39e3a5b23535')
     def test_delete_image(self):
         # Deletes an image by image_id

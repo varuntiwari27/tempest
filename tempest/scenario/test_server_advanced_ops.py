@@ -47,27 +47,6 @@ class TestServerAdvancedOps(manager.ScenarioTest):
         cls.set_network_resources()
         super(TestServerAdvancedOps, cls).setup_credentials()
 
-    @test.idempotent_id('e6c28180-7454-4b59-b188-0257af08a63b')
-    @testtools.skipUnless(CONF.compute_feature_enabled.resize,
-                          'Resize is not available.')
-    @test.services('compute', 'volume')
-    def test_resize_volume_backed_server_confirm(self):
-        # We create an instance for use in this test
-        instance = self.create_server(wait_until='ACTIVE', volume_backed=True)
-        instance_id = instance['id']
-        resize_flavor = CONF.compute.flavor_ref_alt
-        LOG.debug("Resizing instance %s from flavor %s to flavor %s",
-                  instance['id'], instance['flavor']['id'], resize_flavor)
-        self.servers_client.resize_server(instance_id, resize_flavor)
-        waiters.wait_for_server_status(self.servers_client, instance_id,
-                                       'VERIFY_RESIZE')
-
-        LOG.debug("Confirming resize of instance %s", instance_id)
-        self.servers_client.confirm_resize_server(instance_id)
-
-        waiters.wait_for_server_status(self.servers_client, instance_id,
-                                       'ACTIVE')
-
     @test.idempotent_id('949da7d5-72c8-4808-8802-e3d70df98e2c')
     @testtools.skipUnless(CONF.compute_feature_enabled.suspend,
                           'Suspend is not available.')

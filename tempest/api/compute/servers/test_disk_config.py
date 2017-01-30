@@ -46,44 +46,6 @@ class ServerDiskConfigTestJSON(base.BaseV2ComputeTest):
             server = self.client.show_server(server['id'])['server']
             self.assertEqual(disk_config, server['OS-DCF:diskConfig'])
 
-    @test.idempotent_id('bef56b09-2e8c-4883-a370-4950812f430e')
-    def test_rebuild_server_with_manual_disk_config(self):
-        # A server should be rebuilt using the manual disk config option
-        server = self.create_test_server(wait_until='ACTIVE')
-        self.addCleanup(self.client.delete_server, server['id'])
-        self._update_server_with_disk_config(server['id'],
-                                             disk_config='AUTO')
-
-        server = self.client.rebuild_server(server['id'],
-                                            self.image_ref_alt,
-                                            disk_config='MANUAL')['server']
-
-        # Wait for the server to become active
-        waiters.wait_for_server_status(self.client, server['id'], 'ACTIVE')
-
-        # Verify the specified attributes are set correctly
-        server = self.client.show_server(server['id'])['server']
-        self.assertEqual('MANUAL', server['OS-DCF:diskConfig'])
-
-    @test.idempotent_id('9c9fae77-4feb-402f-8450-bf1c8b609713')
-    def test_rebuild_server_with_auto_disk_config(self):
-        # A server should be rebuilt using the auto disk config option
-        server = self.create_test_server(wait_until='ACTIVE')
-        self.addCleanup(self.client.delete_server, server['id'])
-        self._update_server_with_disk_config(server['id'],
-                                             disk_config='MANUAL')
-
-        server = self.client.rebuild_server(server['id'],
-                                            self.image_ref_alt,
-                                            disk_config='AUTO')['server']
-
-        # Wait for the server to become active
-        waiters.wait_for_server_status(self.client, server['id'], 'ACTIVE')
-
-        # Verify the specified attributes are set correctly
-        server = self.client.show_server(server['id'])['server']
-        self.assertEqual('AUTO', server['OS-DCF:diskConfig'])
-
     @test.idempotent_id('414e7e93-45b5-44bc-8e03-55159c6bfc97')
     @testtools.skipUnless(CONF.compute_feature_enabled.resize,
                           'Resize not available.')

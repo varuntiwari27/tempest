@@ -367,30 +367,6 @@ class NetworksTest(base.BaseNetworkTest):
             enable_dhcp=True,
             **self.subnet_dict(['gateway', 'host_routes', 'dns_nameservers']))
 
-    @test.attr(type='smoke')
-    @test.idempotent_id('af774677-42a9-4e4b-bb58-16fe6a5bc1ec')
-    @test.requires_ext(extension='external-net', service='network')
-    @testtools.skipUnless(CONF.network.public_network_id,
-                          'The public_network_id option must be specified.')
-    def test_external_network_visibility(self):
-        """Verifies user can see external networks but not subnets."""
-        body = self.networks_client.list_networks(**{'router:external': True})
-        networks = [network['id'] for network in body['networks']]
-        self.assertNotEmpty(networks, "No external networks found")
-
-        nonexternal = [net for net in body['networks'] if
-                       not net['router:external']]
-        self.assertEmpty(nonexternal, "Found non-external networks"
-                                      " in filtered list (%s)." % nonexternal)
-        self.assertIn(CONF.network.public_network_id, networks)
-        # only check the public network ID because the other networks may
-        # belong to other tests and their state may have changed during this
-        # test
-        body = self.subnets_client.list_subnets(
-            network_id=CONF.network.public_network_id)
-        self.assertEmpty(body['subnets'], "Public subnets visible")
-
-
 class BulkNetworkOpsTest(base.BaseNetworkTest):
     """Tests the following operations in the Neutron API:
 
